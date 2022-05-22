@@ -1,8 +1,8 @@
 
 
-//Product Controller
+
 const ProductController = (function () {
-  //Private
+  
   const Product = function (id,name,price) {
     this.id = id;
     this.name = name;
@@ -13,7 +13,7 @@ const ProductController = (function () {
     selectedProduct: null,
     totalPrice: 0
   }
-  // public
+  
   return {
     getProducts: function () {
       return data.products;
@@ -46,7 +46,7 @@ const ProductController = (function () {
   };
 })();
 
-//UI Controller
+
 const UIController = (function () {
   const Selectors ={
     productList: "#item-list",
@@ -110,7 +110,6 @@ const UIController = (function () {
   };
 })();
 
-//APP Controller
 
 const APP = (function (ProductCtrl, UICtrl) {
 
@@ -129,16 +128,15 @@ const productAddSubmit = function(e){
   const productPrice =document.querySelector(UISelectors.productPrice).value;
   if(productName !== ''&& productPrice !=='')
   {
-    //Add Product
     const newProduct=ProductCtrl.addProduct(productName,productPrice);
     
-    // add item to list
+   
     UIController.addProduct(newProduct);
 
-    //get total
+    
     const total = ProductController.getTotal();
    
-    //show total
+    
     UICtrl.showTotal(total);
     //clear inputs
     UIController.clearInputs();
@@ -157,7 +155,6 @@ const productAddSubmit = function(e){
       
       UICtrl.createProductList(products);
 
-      //Load Event Listeners
       loadEventListeners();
     },
   };
