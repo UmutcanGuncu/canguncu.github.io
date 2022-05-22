@@ -1,67 +1,61 @@
-
-
-
-const ProductController = (function () {
-  
-  const Product = function (id,name,price) {
+const urunKontrol = (function () {
+  const Product = function (id, name, price) {
     this.id = id;
     this.name = name;
     this.price = price;
-  }
-  const data = {
-    products : [],
-    selectedProduct: null,
-    totalPrice: 0
-  }
-  
+  };
+  const veri = {
+    urunler: [],
+    secilenUrunler: null,
+    toplamFiyat: 0,
+  };
+
   return {
-    getProducts: function () {
-      return data.products;
+    getUrunler: function () {
+      return veri.urunler;
     },
-    getData: function () {
-      return data;
+    getVeri: function () {
+      return veri;
     },
-    addProduct:function(name,price){
+    urunEkle: function (name, price) {
       let id;
 
-      if(data.products.length>0){
-        id=data.products[data.products.length-1].id+1
-      }else{
-        id=0;
-      
+      if (veri.urunler.length > 0) {
+        id = veri.urunler[veri.urunler.length - 1].id + 1;
+      } else {
+        id = 1;
       }
-      const newProduct = new Product(id,name,parseFloat(price));
-      data.products.push(newProduct);
-      return newProduct;
+      const yeniUrun = new Product(id, name, parseFloat(price));
+      veri.urunler.push(yeniUrun);
+      return yeniUrun;
     },
-    getTotal : function(){
-        let total =0;
+    getToplam: function () {
+      let toplam = 0;
 
-        data.products.forEach(function(item){
-          total+=item.price;
-        });
-        data.totalPrice = total;
-        return data.totalPrice;
-    }
+      veri.urunler.forEach(function (item) {
+        toplam += item.price;
+      });
+      veri.toplamFiyat = toplam;
+      return veri.toplamFiyat;
+    },
   };
 })();
 
-
-const UIController = (function () {
-  const Selectors ={
-    productList: "#item-list",
-    addButton: '.addBtn',
-    productName : '#productName',
-    productPrice :'#productPrice',
-    productCard : '#productCard',
-    totalTl:'#total-tl',
-    totalDolar:'#total-dolar'
-  }
+const arayuzKontrol = (function () {
+  const secici = {
+    urunListesi: "#urun-listesi",
+    addButton: ".addBtn",
+    urunIsmi: "#urunIsmi",
+    urunFiyati: "#urunFiyati",
+    urunCard: "#urunCard",
+    toplamTl: "#toplam-tl",
+    toplamDolar: "#toplam-dolar",
+  };
   return {
-    createProductList: function (products) {
+    urunListesiOlustur: function (urunler) {
       let html = "";
 
-      products.forEach(prd => {
+      urunler.forEach((prd) => {
         html += `
             <tr>
               <td>${prd.id}</td>
@@ -75,14 +69,14 @@ const UIController = (function () {
             </tr>
             `;
       });
-      document.querySelector(Selectors.productList).innerHTML = html;
+      document.querySelector(secici.urunListesi).innerHTML = html;
     },
-    getSelectors : function(){
-      return Selectors;
+    getSecici: function () {
+      return secici;
     },
-    addProduct: function(prd){
-      document.querySelector(Selectors.productCard).style.display='block';
-      var item =`
+    urunEkle: function (prd) {
+      document.querySelector(secici.urunCard).style.display = "block";
+      var item = `
       <tr>
               <td>${prd.id}</td>
               <td>${prd.name}</td>
@@ -94,81 +88,73 @@ const UIController = (function () {
               </td>
             </tr>
       `;
-      document.querySelector(Selectors.productList).innerHTML += item;
+      document.querySelector(secici.urunListesi).innerHTML += item;
     },
-    clearInputs: function(){
-      document.querySelector(Selectors.productName).value = '';
-      document.querySelector(Selectors.productPrice).value= '';
+    girdiTemizle: function () {
+      document.querySelector(secici.urunIsmi).value = "";
+      document.querySelector(secici.urunFiyati).value = "";
     },
-    hideCard : function(){
-      document.querySelector(Selectors.productCard).style.display ='none';
+    cardGizle: function () {
+      document.querySelector(secici.urunCard).style.display = "none";
     },
-    showTotal: function(total){
-      document.querySelector(Selectors.totalDolar).textContent=total;
-      document.querySelector(Selectors.totalTl).textContent = total*16;
-    }
+    showTotal: function (toplam) {
+      document.querySelector(secici.toplamDolar).textContent = toplam;
+      document.querySelector(secici.toplamTl).textContent = toplam * 16;
+    },
   };
 })();
 
+const uygulama = (function (ProductCtrl, arayuzKntrl) {
+  const arayuzSecicisi = arayuzKontrol.getSecici();
 
-const APP = (function (ProductCtrl, UICtrl) {
+  const loadEventListeners = function () {
+    document
+      .querySelector(arayuzSecicisi.addButton)
+      .addEventListener("click", urunKaydet);
+  };
 
-  const UISelectors = UIController.getSelectors();
+  const urunKaydet = function (e) {
+    const urunIsmi = document.querySelector(arayuzSecicisi.urunIsmi).value;
+    const urunFiyati = document.querySelector(arayuzSecicisi.urunFiyati).value;
+    if (urunIsmi !== "" && urunFiyati !== "") {
+      const yeniUrun = ProductCtrl.urunEkle(urunIsmi, urunFiyati);
 
-//Load Event Listeners
-const loadEventListeners = function(){
-//add product event
-document.querySelector(UISelectors.addButton).addEventListener('click',
-productAddSubmit);
-}
+      arayuzKontrol.urunEkle(yeniUrun);
 
-const productAddSubmit = function(e){
+      const toplam = urunKontrol.getToplam();
 
-  const productName =document.querySelector(UISelectors.productName).value;
-  const productPrice =document.querySelector(UISelectors.productPrice).value;
-  if(productName !== ''&& productPrice !=='')
-  {
-    const newProduct=ProductCtrl.addProduct(productName,productPrice);
-    
-   
-    UIController.addProduct(newProduct);
+      arayuzKntrl.showTotal(toplam);
 
-    
-    const total = ProductController.getTotal();
-   
-    
-    UICtrl.showTotal(total);
-    //clear inputs
-    UIController.clearInputs();
-  }
-  e.preventDefault();
-}
+      arayuzKontrol.girdiTemizle();
+    }
+    e.preventDefault();
+  };
   return {
     init: function () {
       console.log("Uygulama başlatılıyor");
-      const products = ProductCtrl.getProducts();
-      if(products.length==0){
-        UICtrl.hideCard();
-      }else{
-        UICtrl.createProductList(products);
+      const urunler = ProductCtrl.getUrunler();
+      if (urunler.length == 0) {
+        arayuzKntrl.cardGizle();
+      } else {
+        arayuzKntrl.urunListesiOlustur(urunler);
       }
-      
-      UICtrl.createProductList(products);
+
+      arayuzKntrl.urunListesiOlustur(urunler);
 
       loadEventListeners();
     },
   };
-})(ProductController, UIController);
-APP.init();
+})(urunKontrol, arayuzKontrol);
+uygulama.init();
 //Jquery komutları
-$(function(){
-  $("#hide").click(function(){
+$(function () {
+  $("#hide").click(function () {
     $("iframe").hide();
   });
-  $("#show").click(function(){
+  $("#show").click(function () {
     $("iframe").show();
   });
-  $("#toggle").click(function(){
+  $("#toggle").click(function () {
     $("iframe").toggle();
-  })
+  });
 });
